@@ -16,7 +16,7 @@ lastUpdate path =
             bracket malloc free $ \dsCount_ret ->
                 bracket malloc free $ \dsNames_ret ->
                     bracket malloc free $ \lastDs_ret -> do
-                        throwErrnoIf_ (/=0) ("rdd_last_update " ++ show path)
+                        throwErrnoIf_ (/=0) ("rrd " ++ show path)
                             (c'rrd_lastupdate_r c'path lastUpdate_ret dsCount_ret dsNames_ret lastDs_ret)
                         fromEnum `fmap` peek lastUpdate_ret
 
