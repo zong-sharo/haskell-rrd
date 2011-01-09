@@ -1,0 +1,16 @@
+Name: rrd
+Version: 0.1
+Synopsis: librrd interface
+License: BSD3
+Build-Type: Simple
+Cabal-Version: >= 1.2
+Stability: experimental
+
+Library
+    Build-Depends: base >= 4, bindings-librrd == 0.2
+    Exposed-Modules:
+        RRD.Util
+        RRD.Types
+        RRD.Info
+        RRD.Tune
+        RRD.Misc
