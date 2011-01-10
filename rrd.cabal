@@ -1,7 +1,7 @@
 Name: rrd
 Version: 0.1
 Synopsis: librrd interface
-License: BSD3
+License: GPL-2
 Build-Type: Simple
 Cabal-Version: >= 1.2
 Stability: experimental
@@ -14,3 +14,4 @@ Library
         RRD.Info
         RRD.Tune
         RRD.Misc
+        RRD.Resize
