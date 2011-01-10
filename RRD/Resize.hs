@@ -3,13 +3,12 @@ module RRD.Resize
     , grow 
     )where
 import Bindings.Librrd
-import Foreign.C.Error (throwErrnoIf_)
 import System.Directory (getCurrentDirectory, setCurrentDirectory, canonicalizePath, renameFile, doesFileExist)
 import System.IO.Temp (withSystemTempDirectory)
 import System.FilePath ((</>))
 import Control.Exception (bracket)
 import Control.Monad (when)
-import RRD.Util (withCStringArray)
+import RRD.Util (withCStringArray, throwErrnoOrRrdErrorIf_)
 import RRD.Types
 
 {-
@@ -54,4 +53,4 @@ resize' source dest rrdId action rows =
 rrd_resize :: FilePath -> RraId -> String -> Int -> IO ()
 rrd_resize path rraId action rows =
     withCStringArray ["argv0" ,path, show rraId, action, show rows] $ \ c'argc c'argv -> do
-        throwErrnoIf_  (== -1) ("rrd_resize " ++ show path) (c'rrd_resize c'argc c'argv) 
+        throwErrnoOrRrdErrorIf_  (== -1) ("rrd_resize " ++ show path) (c'rrd_resize c'argc c'argv) 

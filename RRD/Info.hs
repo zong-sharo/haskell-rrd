@@ -7,14 +7,13 @@ import Foreign.C.String (withCString, peekCString)
 import Foreign.C.Error (throwErrnoIfNull)
 import Foreign.C.Types (CULong)
 import Foreign.Storable (peek)
-import Foreign.Marshal.Error (throwIfNull)
 import Foreign.Marshal.Array (peekArray)
 import Foreign.Ptr (nullPtr, Ptr)
 import Control.Exception (finally)
 import Control.Monad (when)
 import Data.Word (Word8)
 import RRD.Types
-import RRD.Util (unfoldM)
+import RRD.Util (unfoldM, throwErrnoOrRrdErrorIfNull)
 
 
 data InfoValue
@@ -28,7 +27,7 @@ data InfoValue
 
 rrd_info :: FilePath -> IO [(String, InfoValue)]
 rrd_info path = do
-    info_linked_list <- throwErrnoIfNull ("rrd_info " ++ show path) (withCString path c'rrd_info_r)
+    info_linked_list <- throwErrnoOrRrdErrorIfNull ("rrd_info " ++ show path) (withCString path c'rrd_info_r)
     unfoldM extractNode info_linked_list
         `finally`
         c'rrd_info_free info_linked_list
