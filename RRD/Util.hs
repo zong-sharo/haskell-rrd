@@ -1,12 +1,17 @@
 module RRD.Util
     ( unfoldM
     , withCStringArray
+    , throwErrnoOrRrdErrorIf
+    , throwErrnoOrRrdErrorIf_
     ) where
+import Bindings.Librrd
 import Foreign.Marshal.Alloc (free)
 import Foreign.Marshal.Array (withArray)
-import Foreign.C.String (newCString, CString)
+import Foreign.C.String (newCString, CString, peekCString)
+import Foreign.C.Error (throwErrno)
 import Foreign.Ptr (Ptr)
 import Control.Exception (bracket)
+import Control.Monad (when)
 
 
 unfoldM :: Monad m => (b -> m (Maybe (a, b))) -> b -> m [a]
@@ -24,3 +29,20 @@ withCStringArray xs op =
         (mapM newCString xs) -- XXX this will leak if memory exhausted in the middle of mapM
         (mapM_ free)
         (\c'xs -> withArray c'xs (\arr -> op (fromIntegral $ length xs) arr))
+
+throwErrnoOrRrdErrorIf :: (a -> Bool) -> String -> IO a -> IO a
+throwErrnoOrRrdErrorIf pred loc f = do
+    res <- f
+    if pred res
+       then do
+           rrdErrcode <- c'rrd_test_error
+           when (rrdErrcode /= 0) $ do
+               rrdError <- c'rrd_get_error >>= peekCString
+               c'rrd_clear_error
+               ioError $ userError rrdError
+           throwErrno loc
+
+       else return res
+
+throwErrnoOrRrdErrorIf_ :: (a -> Bool) -> String -> IO a -> IO ()
+throwErrnoOrRrdErrorIf_ pred loc f = throwErrnoOrRrdErrorIf pred loc f >> return ()
