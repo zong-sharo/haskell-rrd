@@ -5,6 +5,7 @@ module RRD.Resize
 import Bindings.Librrd
 import System.Directory (getCurrentDirectory, setCurrentDirectory, canonicalizePath, renameFile, doesFileExist)
 import System.IO.Temp (withSystemTempDirectory)
+import System.IO.Error
 import System.FilePath ((</>))
 import Control.Exception (bracket)
 import Control.Monad (when)
@@ -33,7 +34,10 @@ shrink :: FilePath -> FilePath -> RraId -> Int -> IO ()
 shrink source dest rraId rows = resize' source dest rraId "SHRINK" rows
 
 resize' :: FilePath -> FilePath -> RraId -> String -> Int -> IO ()
-resize' source dest rrdId action rows | source == dest = ioError $ userError "rrd resize: soure and dest filenames must be different"
+resize' source dest rrdId action rows | source == dest =
+    ioError $ flip ioeSetErrorString "source and dest files must be different"
+        $ mkIOError illegalOperationErrorType "rrd resize" Nothing Nothing
+-- ??? does it worth to canonicalize paths before equality check?
 resize' source dest rrdId action rows =
     bracket
         getCurrentDirectory
@@ -42,7 +46,8 @@ resize' source dest rrdId action rows =
             destAbsPath <- canonicalizePath (old_pwd </> dest)
             destAlredyExists <- doesFileExist destAbsPath
             when destAlredyExists $
-                ioError $ userError $ "rrd resize: destination file " ++ show destAbsPath ++ " already exists"
+                ioError $ flip ioeSetErrorString "destination file already exists"
+                    $ mkIOError alreadyExistsErrorType "rrd resize" Nothing (Just destAbsPath)
 
             withSystemTempDirectory "rrd-resize-XXXXXX" $ \tmpdir -> do
                 setCurrentDirectory tmpdir
