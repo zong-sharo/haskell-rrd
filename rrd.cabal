@@ -16,3 +16,4 @@ Library
         RRD.Tune
         RRD.Misc
         RRD.Resize
+        RRD.Dump
