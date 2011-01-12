@@ -17,3 +17,4 @@ Library
         RRD.Misc
         RRD.Resize
         RRD.Dump
+        RRD.RPN
