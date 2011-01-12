@@ -1,7 +1,0 @@
- * [ ] incorporate adopt rrd_error infrastracture
- * [ ] rrd_create
- * [ ] rrd_update
- * [ ] server
- * [ ] import/export
- * [ ] flush
- * [ ] fetch

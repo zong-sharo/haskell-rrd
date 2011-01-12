@@ -6,3 +6,5 @@ type DataSourceName = String
 type HeartBeat = Int
 type Minimum = Double
 type Maximum = Double
+
+type RraId = Int

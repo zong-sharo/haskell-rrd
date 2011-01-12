@@ -6,8 +6,7 @@ module RRD.Tune
     ) where
 import Bindings.Librrd
 import RRD.Types
-import RRD.Util (withCStringArray)
-import Foreign.C.Error (throwErrnoIf_)
+import RRD.Util (withCStringArray, throwErrnoOrRrdErrorIf_)
 import Text.Printf
 import Data.List
 
@@ -64,4 +63,4 @@ tune :: FilePath -> [Tune] -> IO ()
 tune path tunes | null tunes = return ()
                 | otherwise = withCStringArray ("argv0" : path : concatMap renderTune tunes) $ \len arr -> do
                     -- yup, "argv0" it's that simple. rrd_tune both used for console app and api (rrdtool-1.4.4)
-                    throwErrnoIf_ (/=0) ("rrd_tune " ++ show path) $ c'rrd_tune len arr
+                    throwErrnoOrRrdErrorIf_ (/=0) ("rrd_tune " ++ show path) $ c'rrd_tune len arr
