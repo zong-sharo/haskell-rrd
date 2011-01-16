@@ -6,8 +6,7 @@ module RRD.Tune
     ) where
 import Bindings.Librrd
 import RRD.Types
-import RRD.Util (withCStringArray, throwErrnoOrRrdErrorIf_)
-import Text.Printf
+import RRD.Util (withCStringArray, throwErrnoOrRrdErrorIf_, showF)
 import Data.List
 
 
@@ -34,10 +33,6 @@ data DataSourceTune
     deriving Show
 -- XXX --data-source-type wtf?
 
-
-showF :: (Fractional a, PrintfArg a) => a -> String
-showF a = printf "%f" a
-
 renderTune :: Tune -> [String]
 renderTune (DataSourceTune name ops) = concatMap (renderDSTune name) ops
 renderTune (PositiveDelta delta') = ["--deltapos", showF delta']
@@ -57,7 +52,6 @@ renderDSTune name (AlterMinimum min') = ["--minimum", name ++ ":" ++ showF min']
 renderDSTune name (AlterMaximum max') = ["--maximum", name ++ ":" ++ showF max']
 renderDSTune name (RenameTo name') = ["--data-source-rename", name ++ ":" ++ name']
 renderDSTune name ResetAbberant = ["--aberrant-reset", name]
-
 
 tune :: FilePath -> [Tune] -> IO ()
 tune path tunes | null tunes = return ()

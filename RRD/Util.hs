@@ -4,6 +4,7 @@ module RRD.Util
     , throwErrnoOrRrdErrorIf
     , throwErrnoOrRrdErrorIf_
     , throwErrnoOrRrdErrorIfNull
+    , showF
     ) where
 import Bindings.Librrd
 import Foreign.Marshal.Alloc (free)
@@ -13,6 +14,7 @@ import Foreign.C.Error (throwErrno)
 import Foreign.Ptr (Ptr, nullPtr)
 import Control.Exception (bracket)
 import Control.Monad (when)
+import Text.Printf
 
 
 unfoldM :: Monad m => (b -> m (Maybe (a, b))) -> b -> m [a]
@@ -22,7 +24,6 @@ unfoldM op seed = unfoldM' [] op seed >>= (return . reverse)
     unfoldM' acc op seed = do
         a <- op seed
         maybe (return acc) (\(value, seed') -> unfoldM' (value : acc) op seed') a
-
 
 withCStringArray :: Num len => [String] -> (len -> Ptr CString -> IO a) -> IO a
 withCStringArray xs op =
@@ -48,6 +49,8 @@ throwErrnoOrRrdErrorIf pred loc f = do
 throwErrnoOrRrdErrorIf_ :: (a -> Bool) -> String -> IO a -> IO ()
 throwErrnoOrRrdErrorIf_ pred loc f = throwErrnoOrRrdErrorIf pred loc f >> return ()
 
-
 throwErrnoOrRrdErrorIfNull :: String -> IO (Ptr a) -> IO (Ptr a)
 throwErrnoOrRrdErrorIfNull = throwErrnoOrRrdErrorIf (== nullPtr)
+
+showF :: (Fractional a, PrintfArg a) => a -> String
+showF a = printf "%f" a

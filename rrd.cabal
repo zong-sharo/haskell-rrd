@@ -8,7 +8,8 @@ Stability: experimental
 
 Library
     Build-Depends: base >= 4, bindings-librrd == 0.2,
-        temporary >= 1.1.1, filepath >= 1.1, directory >= 1.0
+        temporary >= 1.1.1, filepath >= 1.1, directory >= 1.0,
+        monads-tf >= 0.1
     Exposed-Modules:
         RRD.Util
         RRD.Types
@@ -17,4 +18,5 @@ Library
         RRD.Misc
         RRD.Resize
         RRD.Dump
-        RRD.RPN
+        RRD.RPN.Prim
+        RRD.RPN.Render
