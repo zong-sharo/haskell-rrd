@@ -1,7 +1,7 @@
 {-# LANGUAGE GADTs, PackageImports #-}
 module RRD.RPN.Render where
 import RRD.RPN.Prim
-import "monads-tf" Control.Monad.Writer
+import "monads-tf" Control.Monad.Writer (Writer, runWriter, tell)
 import System.FilePath (takeBaseName)
 
 
@@ -25,7 +25,7 @@ renderRpn (UOp op a) = renderRpn a >> mapM_ push (reprUOp op)
 renderRpn (BOp op a b) = renderRpn a >> renderRpn b >> mapM_ push (reprBOp op)
 renderRpn (If pred a b) = renderRpn a >> renderRpn b >> renderRpn pred >> push "IF"
 renderRpn (Limit a lower upper) = renderRpn a >> renderRpn lower >> renderRpn upper
-renderRpn (Sym s) = push (renderSymbol s)
+renderRpn (Sym s) = push (reprSymbol s)
 renderRpn (Foldr op seed xs)
     | length' xs == 0 = renderRpn seed
     | otherwise = do
@@ -33,8 +33,8 @@ renderRpn (Foldr op seed xs)
         renderRpn seed
         mapM_ push $ concat $ replicate (length' xs) $ reprBOp op
 
-renderSymbol :: Symbol -> String
-renderSymbol sym =
+reprSymbol :: Symbol -> String
+reprSymbol sym =
     case sym of
          Unknown -> "UNKN"
          Infinity -> "INF"
@@ -88,3 +88,22 @@ reprBOp op =
          Atan2 -> ["ATAN2"]
          Cons -> []
          Flip op -> ["EXC"] ++ reprBOp op
+
+renderAggregate :: Aggregate -> Render ()
+renderAggregate (Aggregate ref f) = push (refName ref) >> mapM_ push (reprAggregateFunction f)
+
+reprAggregateFunction :: AggregateFunction -> [String]
+reprAggregateFunction f =
+    case f of
+         Maximum -> ["MAXIMUM"]
+         Minimum -> ["MINIMUM"]
+         AverageValue -> ["AVERAGE"]
+         StandardDeviation -> ["STDEV"]
+         Last -> ["LAST"]
+         First -> ["FIRST"]
+         Total -> ["TOTAL"]
+         Percent n -> [renderValue n, "PERCENT"]
+         PercentNan n -> [renderValue n, "PERCENTNAN"]
+         LeastSquareLineSlope -> ["LSLSLOPE"]
+         LeastSquareLineInt -> ["LSLINT"]
+         LeastSquareLineCorrelationCoefficient -> ["LSLCORREL"]

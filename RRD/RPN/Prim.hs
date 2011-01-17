@@ -6,7 +6,7 @@ module RRD.RPN.Prim
     , UnaryOperator(..)
     , BinaryOperator(..)
     , Symbol(..)
-    , Aggretate(..)
+    , Aggregate(..)
     , AggregateFunction(..)
     , RpnValue(..)
     , PrimExprEq
@@ -19,7 +19,7 @@ import RRD.Util (showF)
 data Reference
     = DataSource String FilePath String
     | Expr String (RpnExpr Double)
-    | AggregateExpr String Aggretate
+    | AggregateExpr String Aggregate
 
 refName :: Reference -> String
 refName (DataSource a _ _) = a
@@ -128,7 +128,7 @@ data Symbol
     | Now
     | RecordTime TimeFormat
 
-data Aggretate = Aggregate Reference AggregateFunction
+data Aggregate = Aggregate Reference AggregateFunction
 
 data AggregateFunction
     = Maximum
